@@ -3,6 +3,7 @@ module golang.org/x/tools/gopls
 go 1.13
 
 require (
+	github.com/go-delve/delve v1.4.1 // indirect
 	github.com/sergi/go-diff v1.1.0
 	golang.org/x/tools v0.0.0-20200626171337-aa94e735be7f
 	honnef.co/go/tools v0.0.1-2020.1.4

@@ -7,6 +7,8 @@ package jsonrpc2
 import (
 	"context"
 	"fmt"
+	"log"
+	"reflect"
 	"sync"
 
 	"golang.org/x/tools/internal/event"
@@ -31,6 +33,7 @@ func MethodNotFound(ctx context.Context, reply Replier, req Request) error {
 // not call Reply for every request that it is passed.
 func MustReplyHandler(handler Handler) Handler {
 	return func(ctx context.Context, reply Replier, req Request) error {
+		log.Println(req.Method())
 		called := false
 		err := handler(ctx, func(ctx context.Context, result interface{}, err error) error {
 			if called {
@@ -88,12 +91,16 @@ func AsyncHandler(handler Handler) Handler {
 	nextRequest := make(chan struct{})
 	close(nextRequest)
 	return func(ctx context.Context, reply Replier, req Request) error {
+		// log.Println(string(debug.Stack()))
 		waitForPrevious := nextRequest
 		nextRequest = make(chan struct{})
 		unlockNext := nextRequest
 		innerReply := reply
 		reply = func(ctx context.Context, result interface{}, err error) error {
+			log.Println(reflect.ValueOf(innerReply).Type())
+			// log.Println(string(debug.Stack()))
 			close(unlockNext)
+			log.Println("call: AsyncHandler innerReply")
 			return innerReply(ctx, result, err)
 		}
 		_, queueDone := event.Start(ctx, "queued")

@@ -66,6 +66,7 @@ func (s *Serve) Run(ctx context.Context, args ...string) error {
 	isDaemon := s.Address != "" || s.Port != 0
 	if di != nil {
 		closeLog, err := di.SetLogFile(s.Logfile, isDaemon)
+		fmt.Println(s.Logfile)
 		if err != nil {
 			return err
 		}

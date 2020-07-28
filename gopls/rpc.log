@@ -1,0 +1,51 @@
+[Trace - 00:53:30.238 AM] Sending request 'initialize - (0)'.
+Params: {"capabilities":{"textDocument":{"codeAction":{"codeActionLiteralSupport":{"codeActionKind":{"valueSet":["quickfix","refactor","refactor.extract","refactor.inline","refactor.rewrite","source","source.organizeImports"]}}},"codeLens":{"dynamicRegistration":true},"colorProvider":{"dynamicRegistration":false},"completion":{"completionItem":{"insertReplaceSupport":false,"snippetSupport":false}},"declaration":{"linkSupport":true},"definition":{"linkSupport":true},"hover":{},"implementation":{"linkSupport":true},"publishDiagnostics":{"relatedInformation":true},"semanticHighlightingCapabilities":{"semanticHighlighting":true},"signatureHelp":{"signatureInformation":{"parameterInformation":{"labelOffsetSupport":true}}},"typeDefinition":{"linkSupport":true}},"workspace":{"applyEdit":true,"didChangeWatchedFiles":{"dynamicRegistration":true}}},"clientInfo":{"name":"LanguageClient-neovim","version":"0.1.158 "},"processId":62290,"rootPath":"/home/kurenaif/Desktop/tools/gopls","rootUri":"file:///home/kurenaif/Desktop/tools/gopls","trace":"off"}
+
+
+[Trace - 00:53:30.243 AM] Received response 'initialize - (0)' in 5ms.
+Result: {"capabilities":{"textDocumentSync":{"openClose":true,"change":2,"save":{}},"completionProvider":{"triggerCharacters":["."]},"hoverProvider":true,"signatureHelpProvider":{"triggerCharacters":["(",","]},"definitionProvider":true,"typeDefinitionProvider":true,"implementationProvider":true,"referencesProvider":true,"documentHighlightProvider":true,"documentSymbolProvider":true,"codeActionProvider":{"codeActionKinds":["quickfix","refactor.rewrite","source.fixAll","source.organizeImports"]},"codeLensProvider":{},"documentLinkProvider":{},"workspaceSymbolProvider":true,"documentFormattingProvider":true,"documentOnTypeFormattingProvider":{"firstTriggerCharacter":""},"renameProvider":true,"foldingRangeProvider":true,"executeCommandProvider":{"commands":["test","tidy","upgrade_dependency","generate","regenerate_cgo"]},"workspace":{"workspaceFolders":{"supported":true,"changeNotifications":"workspace/didChangeWorkspaceFolders"}}},"serverInfo":{"name":"gopls","version":"Build info\n----------\ngolang.org/x/tools/gopls 0.4.3\n    golang.org/x/tools/gopls@v0.4.3 h1:irz7Q+XdHNECamFKbNWKvMV2Ak6zBbwdwbZndG4545I=\n    github.com/BurntSushi/toml@v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=\n    github.com/sergi/go-diff@v1.1.0 h1:we8PVUC3FE2uYfodKH/nBHMSetSfHDR6scGdBi+erh0=\n    golang.org/x/mod@v0.2.0 h1:KU7oHjnv3XNWfa5COkzUifxZmxp1TyI7ImMXqFxLwvQ=\n    golang.org/x/sync@v0.0.0-20190911185100-cd5d95a43a6e h1:vcxGaoTs7kV8m5Np9uUNQin4BrLOthgV7252N8V+FwY=\n    golang.org/x/tools@v0.0.0-20200708181441-6004c8539734 h1:Vc0Vx98oU/O3+qPQ36fnTT5UduS55KLh2uSGbL7mqEo=\n    golang.org/x/xerrors@v0.0.0-20191204190536-9bdfabe68543 h1:E7g+9GITq07hpfrRu66IVDexMakfv52eLZ2CXBWiKr4=\n    honnef.co/go/tools@v0.0.1-2020.1.4 h1:UoveltGrhghAA7ePc+e+QYDHXrBps2PqFZiHkGR/xK8=\n    mvdan.cc/xurls/v2@v2.2.0 h1:NSZPykBXJFCetGZykLAxaL6SIpvbVy/UFEniIfHAa8A=\n\nGo info\n-------\ngo version go1.13.8 linux/amd64\n\n"}}
+
+
+[Trace - 00:53:30.244 AM] Sending notification 'initialized'.
+Params: {}
+
+
+[Trace - 00:53:30.244 AM] Received request 'client/registerCapability - (1)'.
+Params: {"registrations":[{"id":"workspace/didChangeWatchedFiles","method":"workspace/didChangeWatchedFiles","registerOptions":{"watchers":[{"globPattern":"**/*.go","kind":7}]}}]}
+
+
+[Error - Sent] 00:53:30.244 AM #1 entity not found
+
+
+[Trace - 00:53:30.244 AM] Sending notification 'textDocument/didOpen'.
+Params: {"textDocument":{"languageId":"go","text":"// Copyright 2019 The Go Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style\n// license that can be found in the LICENSE file.\n\n// The gopls command is an LSP server for Go.\n// The Language Server Protocol allows any text editor\n// to be extended with IDE-like features;\n// see https://langserver.org/ for details.\n//\n// See https://github.com/golang/tools/tree/master/gopls\n// for the most up-to-date information on the gopls status.\npackage main // import \"golang.org/x/tools/gopls\"\n\nimport (\n\t\"context\"\n\t\"io\"\n\t\"log\"\n\t\"os\"\n\n\t\"golang.org/x/tools/gopls/internal/hooks\"\n\t\"golang.org/x/tools/internal/lsp/cmd\"\n\t\"golang.org/x/tools/internal/tool\"\n)\n\nfunc main() {\n\tctx := context.Background()\n\t// RDWRはreadとwrite。パーミッションで0666は読み書きができるユーザーその他。\n\n\tlogfile, _ := os.OpenFile(\"/home/kurenaif/Desktop/tools/gopls/test.log\", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)\n\tmultiLogFile := io.MultiWriter(logfile)\n\tlog.SetFlags(log.Ldate | log.Ltime | log.Llongfile)\n\tlog.SetOutput(multiLogFile)\n\n\t// io.MultiWriteで、\n\t// 標準出力とファイルの両方を束ねて、\n\t// logの出力先に設定する\n\tlog.SetOutput(io.MultiWriter(logfile, os.Stdout))\n\tlog.Println(\"LSP Start\")\n\ttool.Main(ctx, cmd.New(\"gopls\", \"otu\", nil, hooks.Options), os.Args[1:])\n\tlog.Println(\"LSP End\")\n}\n\nfunc test_function(){\n}\n","uri":"file:///home/kurenaif/Desktop/tools/gopls/main.go","version":0}}
+
+
+[Trace - 00:53:30.244 AM] Sending request 'textDocument/codeLens - (1)'.
+Params: {"textDocument":{"uri":"file:///home/kurenaif/Desktop/tools/gopls/main.go"}}
+
+
+[Trace - 00:53:30.244 AM] Sending request 'textDocument/documentSymbol - (2)'.
+Params: {"textDocument":{"uri":"file:///home/kurenaif/Desktop/tools/gopls/main.go"}}
+
+
+[Trace - 00:53:30.248 AM] Received notification 'window/logMessage'.
+Params: {"type":3,"message":"2020/07/29 00:53:30 Build info\n----------\ngolang.org/x/tools/gopls 0.4.3\n    golang.org/x/tools/gopls@v0.4.3 h1:irz7Q+XdHNECamFKbNWKvMV2Ak6zBbwdwbZndG4545I=\n    github.com/BurntSushi/toml@v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=\n    github.com/sergi/go-diff@v1.1.0 h1:we8PVUC3FE2uYfodKH/nBHMSetSfHDR6scGdBi+erh0=\n    golang.org/x/mod@v0.2.0 h1:KU7oHjnv3XNWfa5COkzUifxZmxp1TyI7ImMXqFxLwvQ=\n    golang.org/x/sync@v0.0.0-20190911185100-cd5d95a43a6e h1:vcxGaoTs7kV8m5Np9uUNQin4BrLOthgV7252N8V+FwY=\n    golang.org/x/tools@v0.0.0-20200708181441-6004c8539734 h1:Vc0Vx98oU/O3+qPQ36fnTT5UduS55KLh2uSGbL7mqEo=\n    golang.org/x/xerrors@v0.0.0-20191204190536-9bdfabe68543 h1:E7g+9GITq07hpfrRu66IVDexMakfv52eLZ2CXBWiKr4=\n    honnef.co/go/tools@v0.0.1-2020.1.4 h1:UoveltGrhghAA7ePc+e+QYDHXrBps2PqFZiHkGR/xK8=\n    mvdan.cc/xurls/v2@v2.2.0 h1:NSZPykBXJFCetGZykLAxaL6SIpvbVy/UFEniIfHAa8A=\n\nGo info\n-------\ngo version go1.13.8 linux/amd64\n\n\n"}
+
+
+[Trace - 00:53:30.364 AM] Received notification 'window/logMessage'.
+Params: {"type":3,"message":"2020/07/29 00:53:30 go env for /home/kurenaif/Desktop/tools/gopls\n(valid build configuration = true)\n(build flags: [])\nGO111MODULE=\"\"\nGOARCH=\"amd64\"\nGOBIN=\"\"\nGOCACHE=\"/home/kurenaif/.cache/go-build\"\nGOENV=\"/home/kurenaif/.config/go/env\"\nGOEXE=\"\"\nGOFLAGS=\"\"\nGOHOSTARCH=\"amd64\"\nGOHOSTOS=\"linux\"\nGONOPROXY=\"\"\nGONOSUMDB=\"\"\nGOOS=\"linux\"\nGOPATH=\"/home/kurenaif/go\"\nGOPRIVATE=\"\"\nGOPROXY=\"https://proxy.golang.org,direct\"\nGOROOT=\"/usr/lib/go-1.13\"\nGOSUMDB=\"sum.golang.org\"\nGOTMPDIR=\"\"\nGOTOOLDIR=\"/usr/lib/go-1.13/pkg/tool/linux_amd64\"\nGCCGO=\"gccgo\"\nAR=\"ar\"\nCC=\"gcc\"\nCXX=\"g++\"\nCGO_ENABLED=\"1\"\nGOMOD=\"/home/kurenaif/Desktop/tools/gopls/go.mod\"\nCGO_CFLAGS=\"-g -O2\"\nCGO_CPPFLAGS=\"\"\nCGO_CXXFLAGS=\"-g -O2\"\nCGO_FFLAGS=\"-g -O2\"\nCGO_LDFLAGS=\"-g -O2\"\nPKG_CONFIG=\"pkg-config\"\nGOGCCFLAGS=\"-fPIC -m64 -pthread -fmessage-length=0 -fdebug-prefix-map=/tmp/go-build623930956=/tmp/go-build -gno-record-gcc-switches\"\n\n"}
+
+
+[Trace - 00:53:30.518 AM] Received notification 'window/logMessage'.
+Params: {"type":3,"message":"2020/07/29 00:53:30 go/packages.Load\n\tsnapshot=0\n\tdirectory=/home/kurenaif/Desktop/tools/gopls\n\tquery=[./... builtin]\n\tpackages=11\n"}
+
+
+[Trace - 00:53:30.615 AM] Received response 'textDocument/codeLens - (1)' in 370ms.
+Result: null
+
+
+[Trace - 00:53:30.846 AM] Received response 'textDocument/documentSymbol - (2)' in 601ms.
+Result: [{"name":"main","kind":12,"location":{"uri":"file:///home/kurenaif/Desktop/tools/gopls/main.go","range":{"start":{"line":24,"character":0},"end":{"line":40,"character":1}}}},{"name":"test_function","kind":12,"location":{"uri":"file:///home/kurenaif/Desktop/tools/gopls/main.go","range":{"start":{"line":42,"character":0},"end":{"line":43,"character":1}}}}]
+
+

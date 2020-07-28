@@ -11,6 +11,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"golang.org/x/tools/internal/jsonrpc2"
 )
@@ -69,6 +70,7 @@ type Server interface {
 }
 
 func serverDispatch(ctx context.Context, server Server, reply jsonrpc2.Replier, r jsonrpc2.Request) (bool, error) {
+	log.Printf("Server Dispatch Method: %s", r.Method())
 	switch r.Method() {
 	case "workspace/didChangeWorkspaceFolders": // notif
 		var params DidChangeWorkspaceFoldersParams
@@ -85,6 +87,7 @@ func serverDispatch(ctx context.Context, server Server, reply jsonrpc2.Replier, 
 		err := server.WorkDoneProgressCancel(ctx, &params)
 		return true, reply(ctx, nil, err)
 	case "initialized": // notif
+		log.Println("initialized!!!")
 		var params InitializedParams
 		if err := json.Unmarshal(r.Params(), &params); err != nil {
 			return true, sendParseError(ctx, reply, err)
@@ -228,11 +231,15 @@ func serverDispatch(ctx context.Context, server Server, reply jsonrpc2.Replier, 
 		resp, err := server.OutgoingCalls(ctx, &params)
 		return true, reply(ctx, resp, err)
 	case "initialize": // req
+		log.Println("initialize!!!!")
 		var params ParamInitialize
+		log.Println("r.Params(): ", string(r.Params()))
 		if err := json.Unmarshal(r.Params(), &params); err != nil {
 			return true, sendParseError(ctx, reply, err)
 		}
+		log.Println("params: ", params)
 		resp, err := server.Initialize(ctx, &params)
+		log.Println("resp: ", resp)
 		return true, reply(ctx, resp, err)
 	case "shutdown": // req
 		if len(r.Params()) > 0 {
@@ -423,6 +430,7 @@ func (s *serverDispatcher) WorkDoneProgressCancel(ctx context.Context, params *W
 }
 
 func (s *serverDispatcher) Initialized(ctx context.Context, params *InitializedParams) error {
+	log.Println("initialized!!!")
 	return s.Conn.Notify(ctx, "initialized", params)
 }
 
@@ -546,6 +554,7 @@ func (s *serverDispatcher) OutgoingCalls(ctx context.Context, params *CallHierar
 }
 
 func (s *serverDispatcher) Initialize(ctx context.Context, params *ParamInitialize) (*InitializeResult, error) {
+	log.Println("tsserver Initialize")
 	var result *InitializeResult
 	if err := Call(ctx, s.Conn, "initialize", params, &result); err != nil {
 		return nil, err

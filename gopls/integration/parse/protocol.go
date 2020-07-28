@@ -15,6 +15,7 @@ import (
 
 // Requests returns a pointer to a type suitable for Unmarshal
 func Requests(m string) interface{} {
+	log.Println("Request: ", m)
 	// these are in the documentation's order
 	switch m {
 	case "initialize":
@@ -94,6 +95,7 @@ func Requests(m string) interface{} {
 
 // Notifs returns a pointer to a type suitable for Unmarshal
 func Notifs(m string) interface{} {
+	log.Println("Notifs: ", m)
 	switch m {
 	case "$/cancelRequest":
 		return new(p.CancelParams)
@@ -139,6 +141,7 @@ func Notifs(m string) interface{} {
 // Responses returns a slice of types, one of which should be
 // suitable for Unmarshal
 func Responses(m string) []interface{} {
+	log.Println("Responses: ", m)
 	switch m {
 	case "initialize":
 		return []interface{}{new(p.InitializeResult)}

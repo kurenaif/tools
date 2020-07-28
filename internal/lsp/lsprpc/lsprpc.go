@@ -75,11 +75,7 @@ func (s *StreamServer) ServeStream(ctx context.Context, conn jsonrpc2.Conn) erro
 		executable = ""
 	}
 	ctx = protocol.WithClient(ctx, client)
-	conn.Go(ctx,
-		protocol.Handlers(
-			handshaker(session, executable,
-				protocol.ServerHandler(server,
-					jsonrpc2.MethodNotFound))))
+	conn.Go(ctx, protocol.Handlers(handshaker(session, executable, protocol.ServerHandler(server, jsonrpc2.MethodNotFound))))
 	if s.logConnections {
 		log.Printf("Session %s: connected", session.ID())
 		defer log.Printf("Session %s: exited", session.ID())
@@ -471,8 +467,10 @@ const (
 
 func handshaker(session *cache.Session, goplsPath string, handler jsonrpc2.Handler) jsonrpc2.Handler {
 	return func(ctx context.Context, reply jsonrpc2.Replier, r jsonrpc2.Request) error {
+		log.Printf("%#v\n", r.Method())
 		switch r.Method() {
 		case handshakeMethod:
+			log.Printf("%#v\n", "handshakeMethod")
 			// We log.Printf in this handler, rather than event.Log when we want logs
 			// to go to the daemon log rather than being reflected back to the
 			// client.
@@ -501,6 +499,7 @@ func handshaker(session *cache.Session, goplsPath string, handler jsonrpc2.Handl
 
 			return reply(ctx, resp, nil)
 		case sessionsMethod:
+			log.Printf("%#v\n", "sessionsMethod")
 			resp := ServerState{
 				GoplsPath:       goplsPath,
 				CurrentClientID: session.ID(),
@@ -518,6 +517,7 @@ func handshaker(session *cache.Session, goplsPath string, handler jsonrpc2.Handl
 			}
 			return reply(ctx, resp, nil)
 		}
+		log.Printf("%#v\n", "return handler")
 		return handler(ctx, reply, r)
 	}
 }

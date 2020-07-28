@@ -4,6 +4,7 @@ package lsp
 
 import (
 	"context"
+	"log"
 
 	"golang.org/x/tools/internal/lsp/protocol"
 )
@@ -105,10 +106,14 @@ func (s *Server) IncomingCalls(context.Context, *protocol.CallHierarchyIncomingC
 }
 
 func (s *Server) Initialize(ctx context.Context, params *protocol.ParamInitialize) (*protocol.InitializeResult, error) {
-	return s.initialize(ctx, params)
+	log.Println("Server.Initialize")
+	res, err := s.initialize(ctx, params)
+	log.Printf("initialize result: %#v\n", res)
+	return res, err
 }
 
 func (s *Server) Initialized(ctx context.Context, params *protocol.InitializedParams) error {
+	log.Println("Server.Initialized")
 	return s.initialized(ctx, params)
 }
 

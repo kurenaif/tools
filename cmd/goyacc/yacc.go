@@ -51,6 +51,7 @@ import (
 	"fmt"
 	"go/format"
 	"io/ioutil"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -540,6 +541,7 @@ outer:
 	}
 
 	if t == ENDFILE {
+		log.Println("debug log")
 		errorf("unexpected EOF before %%")
 	}
 

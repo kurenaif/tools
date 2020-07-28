@@ -8,6 +8,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"runtime/debug"
 	"sync"
 	"sync/atomic"
 
@@ -155,24 +157,32 @@ func (c *conn) Call(ctx context.Context, method string, params, result interface
 
 func (c *conn) replier(req Request, spanDone func()) Replier {
 	return func(ctx context.Context, result interface{}, err error) error {
+		log.Println("conn replier")
 		defer func() {
 			recordStatus(ctx, err)
 			spanDone()
 		}()
+		log.Println("START req.(*Call)")
 		call, ok := req.(*Call)
+		log.Println("END req.(*Call)")
+		log.Println("ok: ", ok)
 		if !ok {
 			// request was a notify, no need to respond
 			return nil
 		}
 		response, err := NewResponse(call.id, result, err)
+		log.Printf("%#v\n", response)
 		if err != nil {
 			return err
 		}
+		log.Printf("START write")
 		n, err := c.write(ctx, response)
+		log.Printf("END write")
 		event.Metric(ctx, tag.SentBytes.Of(n))
 		if err != nil {
 			// TODO(iancottrell): if a stream write fails, we really need to shut down
 			// the whole stream
+			log.Println(err)
 			return err
 		}
 		return nil
@@ -215,6 +225,8 @@ func (c *conn) run(ctx context.Context, handler Handler) {
 			event.Metric(reqCtx,
 				tag.Started.Of(1),
 				tag.ReceivedBytes.Of(n))
+			// here!!
+			debug.PrintStack()
 			if err := handler(reqCtx, c.replier(msg, spanDone), msg); err != nil {
 				// delivery failed, not much we can do
 				event.Error(reqCtx, "jsonrpc2 message delivery failed", err)

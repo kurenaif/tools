@@ -560,6 +560,7 @@ func parseHeader(doc *Doc, isMarkdown bool, lines *Lines) error {
 	// First non-empty line starts header.
 	doc.Title, ok = lines.nextNonEmpty()
 	if !ok {
+		log.Println("debug log")
 		return errors.New("unexpected EOF; expected title")
 	}
 	if isMarkdown {
@@ -569,6 +570,7 @@ func parseHeader(doc *Doc, isMarkdown bool, lines *Lines) error {
 	for {
 		text, ok := lines.next()
 		if !ok {
+			log.Println("debug log")
 			return errors.New("unexpected EOF")
 		}
 		if text == "" {
@@ -603,6 +605,7 @@ func parseAuthors(name, sectionPrefix string, lines *Lines) (authors []Author, e
 
 	// Skip blank lines.
 	if _, ok := lines.nextNonEmpty(); !ok {
+		log.Println("debug log")
 		return nil, errors.New("unexpected EOF")
 	}
 	lines.back()
@@ -611,6 +614,7 @@ func parseAuthors(name, sectionPrefix string, lines *Lines) (authors []Author, e
 	for {
 		text, ok := lines.next()
 		if !ok {
+			log.Println("debug log")
 			return nil, errors.New("unexpected EOF")
 		}
 

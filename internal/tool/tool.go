@@ -82,6 +82,7 @@ func CommandLineErrorf(message string, args ...interface{}) error {
 // was encountered it is printed to standard error and the
 // application exits with an exit code of 2.
 func Main(ctx context.Context, app Application, args []string) {
+
 	s := flag.NewFlagSet(app.Name(), flag.ExitOnError)
 	s.Usage = func() {
 		fmt.Fprint(s.Output(), app.ShortHelp())

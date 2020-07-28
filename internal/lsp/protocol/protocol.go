@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"golang.org/x/tools/internal/event"
 	"golang.org/x/tools/internal/jsonrpc2"
@@ -55,11 +56,15 @@ func ClientHandler(client Client, handler jsonrpc2.Handler) jsonrpc2.Handler {
 
 func ServerHandler(server Server, handler jsonrpc2.Handler) jsonrpc2.Handler {
 	return func(ctx context.Context, reply jsonrpc2.Replier, req jsonrpc2.Request) error {
+		log.Println("ServerHandler")
 		if ctx.Err() != nil {
+			log.Println("ctx err")
 			ctx := xcontext.Detach(ctx)
 			return reply(ctx, nil, RequestCancelledError)
 		}
+		log.Println("call serverDispatch")
 		handled, err := serverDispatch(ctx, server, reply, req)
+		log.Printf("handled: %#v\n", handled)
 		if handled || err != nil {
 			return err
 		}
@@ -68,22 +73,22 @@ func ServerHandler(server Server, handler jsonrpc2.Handler) jsonrpc2.Handler {
 		// non standard request should just be a layered handler.
 		var params interface{}
 		if err := json.Unmarshal(req.Params(), &params); err != nil {
+			log.Println("sendParseError")
 			return sendParseError(ctx, reply, err)
 		}
 		resp, err := server.NonstandardRequest(ctx, req.Method(), params)
+		log.Println("ServerHandler reply")
 		return reply(ctx, resp, err)
-
 	}
 }
 func Handlers(handler jsonrpc2.Handler) jsonrpc2.Handler {
-	return CancelHandler(
-		jsonrpc2.AsyncHandler(
-			jsonrpc2.MustReplyHandler(handler)))
+	return CancelHandler(jsonrpc2.AsyncHandler(jsonrpc2.MustReplyHandler(handler)))
 }
 
 func CancelHandler(handler jsonrpc2.Handler) jsonrpc2.Handler {
 	handler, canceller := jsonrpc2.CancelHandler(handler)
 	return func(ctx context.Context, reply jsonrpc2.Replier, req jsonrpc2.Request) error {
+		// log.Println(string(debug.Stack()))
 		if req.Method() != "$/cancelRequest" {
 			// TODO(iancottrell): See if we can generate a reply for the request to be cancelled
 			// at the point of cancellation rather than waiting for gopls to naturally reply.
@@ -92,6 +97,7 @@ func CancelHandler(handler jsonrpc2.Handler) jsonrpc2.Handler {
 			// TODO(iancottrell): Add a test that watches the stream and verifies the response
 			// for the cancelled request flows.
 			replyWithDetachedContext := func(ctx context.Context, resp interface{}, err error) error {
+				log.Println("replyWithDetachedContext")
 				// https://microsoft.github.io/language-server-protocol/specifications/specification-current/#cancelRequest
 				if ctx.Err() != nil && err == nil {
 					err = RequestCancelledError
@@ -117,6 +123,7 @@ func CancelHandler(handler jsonrpc2.Handler) jsonrpc2.Handler {
 }
 
 func Call(ctx context.Context, conn jsonrpc2.Conn, method string, params interface{}, result interface{}) error {
+	log.Println("Call method:", method)
 	id, err := conn.Call(ctx, method, params, result)
 	if ctx.Err() != nil {
 		cancelCall(ctx, conn, id)

@@ -13,6 +13,8 @@ package main // import "golang.org/x/tools/gopls"
 
 import (
 	"context"
+	"io"
+	"log"
 	"os"
 
 	"golang.org/x/tools/gopls/internal/hooks"
@@ -22,5 +24,21 @@ import (
 
 func main() {
 	ctx := context.Background()
-	tool.Main(ctx, cmd.New("gopls", "", nil, hooks.Options), os.Args[1:])
+	// RDWRはreadとwrite。パーミッションで0666は読み書きができるユーザーその他。
+
+	logfile, _ := os.OpenFile("/home/kurenaif/Desktop/tools/gopls/test.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	multiLogFile := io.MultiWriter(logfile)
+	log.SetFlags(log.Ldate | log.Ltime | log.Llongfile)
+	log.SetOutput(multiLogFile)
+
+	// io.MultiWriteで、
+	// 標準出力とファイルの両方を束ねて、
+	// logの出力先に設定する
+	log.SetOutput(io.MultiWriter(logfile, os.Stdout))
+	log.Println("LSP Start")
+	tool.Main(ctx, cmd.New("gopls", "otu", nil, hooks.Options), os.Args[1:])
+	log.Println("LSP End")
+}
+
+func test_function(){
 }

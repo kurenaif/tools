@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path"
 	"sync"
@@ -23,6 +24,7 @@ import (
 )
 
 func (s *Server) initialize(ctx context.Context, params *protocol.ParamInitialize) (*protocol.InitializeResult, error) {
+	log.Println("Server.initialize")
 	s.stateMu.Lock()
 	if s.state >= serverInitializing {
 		defer s.stateMu.Unlock()
@@ -73,6 +75,8 @@ func (s *Server) initialize(ctx context.Context, params *protocol.ParamInitializ
 
 	goplsVer := &bytes.Buffer{}
 	debug.PrintVersionInfo(ctx, goplsVer, true, debug.PlainText)
+
+	log.Println("initialize success")
 
 	return &protocol.InitializeResult{
 		Capabilities: protocol.ServerCapabilities{
@@ -130,11 +134,15 @@ func (s *Server) initialized(ctx context.Context, params *protocol.InitializedPa
 	}
 	s.state = serverInitialized
 	s.stateMu.Unlock()
+	log.Println("s.state:", s.state)
 
 	options := s.session.Options()
+	log.Println("options", options)
+	log.Println("initialized")
 	defer func() { s.session.SetOptions(options) }()
 
 	var registrations []protocol.Registration
+	log.Println("initialized")
 	if options.ConfigurationSupported && options.DynamicConfigurationSupported {
 		registrations = append(registrations,
 			protocol.Registration{
@@ -147,6 +155,7 @@ func (s *Server) initialized(ctx context.Context, params *protocol.InitializedPa
 			},
 		)
 	}
+	log.Println("initialized")
 
 	// TODO: this event logging may be unnecessary.
 	// The version info is included in the initialize response.
@@ -155,14 +164,21 @@ func (s *Server) initialized(ctx context.Context, params *protocol.InitializedPa
 	event.Log(ctx, buf.String())
 
 	if err := s.addFolders(ctx, s.pendingFolders); err != nil {
+		log.Println(err)
 		return err
 	}
 	s.pendingFolders = nil
+	log.Println("initialized")
 
 	if options.DynamicWatchedFilesSupported {
+		log.Println("initialized")
 		for _, view := range s.session.Views() {
+			log.Println("initialized")
 			dirs, err := view.WorkspaceDirectories(ctx)
+			log.Println("initialized")
+			log.Println(dirs)
 			if err != nil {
+				log.Println(err)
 				return err
 			}
 			for _, dir := range dirs {
@@ -178,12 +194,16 @@ func (s *Server) initialized(ctx context.Context, params *protocol.InitializedPa
 				})
 			}
 		}
+		log.Println("initialized")
 		if len(registrations) > 0 {
+			log.Println("start RegisterCapability")
 			s.client.RegisterCapability(ctx, &protocol.RegistrationParams{
 				Registrations: registrations,
 			})
+			log.Println("end RegisterCapability")
 		}
 	}
+	log.Println("initialized finish")
 	return nil
 }
 

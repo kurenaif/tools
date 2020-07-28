@@ -7,6 +7,7 @@ package jsonrpc2
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	errors "golang.org/x/xerrors"
 )
@@ -196,6 +197,15 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 
 func DecodeMessage(data []byte) (Message, error) {
 	msg := wireCombined{}
+
+	// type wireCombined struct {
+	// 	VersionTag wireVersionTag   `json:"jsonrpc"`
+	// 	ID         *ID              `json:"id,omitempty"`
+	// 	Method     string           `json:"method"`
+	// 	Params     *json.RawMessage `json:"params,omitempty"`
+	// 	Result     *json.RawMessage `json:"result,omitempty"`
+	// 	Error      *wireError       `json:"error,omitempty"`
+	// }
 	if err := json.Unmarshal(data, &msg); err != nil {
 		return nil, fmt.Errorf("unmarshaling jsonrpc message: %w", err)
 	}
@@ -224,6 +234,7 @@ func DecodeMessage(data []byte) (Message, error) {
 	}
 	// request with an ID, must be a call
 	call := &Call{method: msg.Method, id: *msg.ID}
+	log.Printf("message: %#v\n", call)
 	if msg.Params != nil {
 		call.params = *msg.Params
 	}

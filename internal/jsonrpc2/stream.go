@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"strconv"
 	"strings"
@@ -141,6 +142,7 @@ func (s *headerStream) Read(ctx context.Context) (Message, int64, error) {
 	if _, err := io.ReadFull(s.in, data); err != nil {
 		return nil, total, err
 	}
+	log.Printf("recieved data:%s \n", data)
 	total += length
 	msg, err := DecodeMessage(data)
 	return msg, total, err

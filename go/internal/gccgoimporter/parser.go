@@ -16,6 +16,7 @@ import (
 	"go/token"
 	"go/types"
 	"io"
+	"log"
 	"strconv"
 	"strings"
 	"text/scanner"
@@ -131,6 +132,7 @@ func (p *parser) parseString() string {
 // unquotedStringChar = <neither a whitespace nor a ';' char> .
 func (p *parser) parseUnquotedString() string {
 	if p.tok == scanner.EOF {
+		log.Println("debug log")
 		p.error("unexpected EOF")
 	}
 	var buf bytes.Buffer
@@ -1015,6 +1017,7 @@ func (p *parser) skipInlineBody() {
 	for got < want {
 		r := p.scanner.Next()
 		if r == scanner.EOF {
+			log.Println("debug log")
 			p.error("unexpected EOF")
 		}
 		got += utf8.RuneLen(r)
@@ -1052,6 +1055,7 @@ func (p *parser) parseTypes(pkg *types.Package) {
 	for sb.Len() < total {
 		r := p.scanner.Next()
 		if r == scanner.EOF {
+			log.Println("debug log")
 			p.error("unexpected EOF")
 		}
 		sb.WriteRune(r)
